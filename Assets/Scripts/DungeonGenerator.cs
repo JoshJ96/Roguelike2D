@@ -68,18 +68,73 @@ public class DungeonGenerator : MonoBehaviour
     //Generate Maze within open node list
     private void GenerateMaze()
     {
-        for (int i = 0; i < 5; i++)
+        //Choose random node from the open list
+        int randomIndex = random.Next(openMazeNodes.Count);
+
+        //Switch lists and turn into wall
+        Node randomNodeChosen = openMazeNodes[randomIndex];
+        closedMazeNodes.Add(openMazeNodes[randomIndex]);
+        openMazeNodes.RemoveAt(randomIndex);
+
+        //Scan surrounding nodes and choose a random direction
+        //Get number of possible directions
+        List<Node> possibleDirections = new List<Node>();
+        if (openMazeNodes.Contains(map[randomNodeChosen.x + 1,randomNodeChosen.y]))
         {
-            //Choose random node from the open list
-            int randomIndex = random.Next(openMazeNodes.Count);
-
-            //Switch lists and turn into wall
-            openMazeNodes[randomIndex].currentState = Node.States.Wall;
-            closedMazeNodes.Add(openMazeNodes[randomIndex]);
-            openMazeNodes.RemoveAt(randomIndex);
+            possibleDirections.Add(map[randomNodeChosen.x + 1, randomNodeChosen.y]);
         }
-        
+        if (openMazeNodes.Contains(map[randomNodeChosen.x - 1, randomNodeChosen.y]))
+        {
+            possibleDirections.Add(map[randomNodeChosen.x - 1, randomNodeChosen.y]);
+        }
+        if (openMazeNodes.Contains(map[randomNodeChosen.x, randomNodeChosen.y - 1]))
+        {
+            possibleDirections.Add(map[randomNodeChosen.x, randomNodeChosen.y - 1]);
+        }
+        if (openMazeNodes.Contains(map[randomNodeChosen.x, randomNodeChosen.y + 1]))
+        {
+            possibleDirections.Add(map[randomNodeChosen.x, randomNodeChosen.y + 1]);
+        }
 
+        //Todo - dead end!
+        if (possibleDirections.Count == 0)
+        {
+            return;
+        }
+
+        //Choose random node from the possibleDirections list
+        int randomDirectionIndex = random.Next(possibleDirections.Count);
+
+        //Officially set the node to carve to
+        Node carveNodeChosen = possibleDirections[randomDirectionIndex];
+
+        //Switch lists
+        closedMazeNodes.Add(carveNodeChosen);
+        openMazeNodes.Remove(carveNodeChosen);
+
+        //Set the adjacent tiles to wall, to make way for the "blocky" maze
+        //If the "to carve" node is to the RIGHT or LEFT of our starting point
+        if (carveNodeChosen.x > randomNodeChosen.x || carveNodeChosen.x < randomNodeChosen.x)
+        {
+            //Switch lists of top and bottom nodes
+            closedMazeNodes.Add(map[randomNodeChosen.x, randomNodeChosen.y + 1]);
+            closedMazeNodes.Add(map[randomNodeChosen.x, randomNodeChosen.y - 1]);
+            openMazeNodes.Remove(map[randomNodeChosen.x, randomNodeChosen.y + 1]);
+            openMazeNodes.Remove(map[randomNodeChosen.x, randomNodeChosen.y - 1]);
+            map[randomNodeChosen.x, randomNodeChosen.y + 1].currentState = Node.States.Wall;
+            map[randomNodeChosen.x, randomNodeChosen.y - 1].currentState = Node.States.Wall;
+        }
+        //If the "to carve" node is UP or DOWN of our starting point
+        if (carveNodeChosen.y > randomNodeChosen.y || carveNodeChosen.y < randomNodeChosen.y)
+        {
+            //Switch lists of top and bottom nodes
+            closedMazeNodes.Add(map[randomNodeChosen.x + 1, randomNodeChosen.y]);
+            closedMazeNodes.Add(map[randomNodeChosen.x - 1, randomNodeChosen.y]);
+            openMazeNodes.Remove(map[randomNodeChosen.x + 1, randomNodeChosen.y]);
+            openMazeNodes.Remove(map[randomNodeChosen.x - 1, randomNodeChosen.y]);
+            map[randomNodeChosen.x - 1, randomNodeChosen.y].currentState = Node.States.Wall;
+            map[randomNodeChosen.x + 1, randomNodeChosen.y].currentState = Node.States.Wall;
+        }
     }
 
     //Fill map with walls based on width and height
