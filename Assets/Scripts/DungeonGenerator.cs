@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using UnityEngine;
 
 public class DungeonGenerator : MonoBehaviour
@@ -9,13 +11,29 @@ public class DungeonGenerator : MonoBehaviour
     public int roomHeight;
     public GameObject wallObject;
 
-    private void Start()
+    private void Update()
     {
+        //Create dungeon when space is pressed
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            GenerateDungeon();
+        }
+    }
+
+    private void GenerateDungeon()
+    {
+        //Timer
+        var startTime = DateTime.Now.Millisecond;
+
         //Fill map with walls
         FillMap(roomWidth, roomHeight);
 
         //Print map tiles
         PrintMap(map);
+
+        // Get the elapsed time as a TimeSpan value.
+        var endTime = DateTime.Now.Millisecond;
+        print($"Dungeon generated. Took { endTime - startTime } ms");
     }
 
     //Fill map with walls based on width and height
