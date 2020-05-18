@@ -10,9 +10,9 @@ public class DungeonGenerator : MonoBehaviour
         
     }
 
-    // Update is called once per frame
-    void Update()
+    //Method for printing 2D tiles based on map[,] array.
+    private void PrintMap(int[] map)
     {
-        
+
     }
 }
