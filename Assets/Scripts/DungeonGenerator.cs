@@ -15,6 +15,7 @@ public class DungeonGenerator : MonoBehaviour
     public GameObject floorObject;
     public List<Node> openMazeNodes = new List<Node>();
     public List<Node> closedMazeNodes = new List<Node>();
+    System.Random random = new System.Random();
 
     //Game loop
     private void Update()
@@ -64,14 +65,21 @@ public class DungeonGenerator : MonoBehaviour
         }
     }
 
-    //Generate Maze. Keeps 1 node outline on map
+    //Generate Maze within open node list
     private void GenerateMaze()
     {
-        //Choose random node from the open list
-        System.Random random = new System.Random();
-        int randomIndex = random.Next(openMazeNodes.Count);
+        for (int i = 0; i < 5; i++)
+        {
+            //Choose random node from the open list
+            int randomIndex = random.Next(openMazeNodes.Count);
 
-        openMazeNodes[randomIndex].currentState = Node.States.Wall;
+            //Switch lists and turn into wall
+            openMazeNodes[randomIndex].currentState = Node.States.Wall;
+            closedMazeNodes.Add(openMazeNodes[randomIndex]);
+            openMazeNodes.RemoveAt(randomIndex);
+        }
+        
+
     }
 
     //Fill map with walls based on width and height
