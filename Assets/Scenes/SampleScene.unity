@@ -278,8 +278,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fb6b7da9431e084cb42ac4dd30c7e11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomWidth: 35
-  roomHeight: 35
+  roomWidth: 1
+  roomHeight: 1
   wallObject: {fileID: 1947651227833026573, guid: f7f40fc3ec7b87a4bbe013edcf5c9e63,
     type: 3}
 --- !u!1001 &1678582361

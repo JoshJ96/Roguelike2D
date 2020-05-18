@@ -1,16 +1,18 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
 using UnityEngine;
 
+/// <summary>
+/// Generates the dungeon at the beginning of the scene
+/// </summary>
 public class DungeonGenerator : MonoBehaviour
 {
-    public int[,] map;
+    //Variables
+    public Node[,] map;
     public int roomWidth;
     public int roomHeight;
     public GameObject wallObject;
 
+    //Game loop
     private void Update()
     {
         //Create dungeon when space is pressed
@@ -20,6 +22,7 @@ public class DungeonGenerator : MonoBehaviour
         }
     }
 
+    //Generate Dungeon
     private void GenerateDungeon()
     {
         //Timer
@@ -40,27 +43,27 @@ public class DungeonGenerator : MonoBehaviour
     private void FillMap(int _roomWidth, int _roomHeight)
     {
         //Initialize map variable
-        map = new int[_roomWidth,_roomHeight];
+        map = new Node[_roomWidth, _roomHeight];
 
         //Loop through map array
-        for (int x = 0; x < roomWidth; x++)
+        for (int x = 0; x < roomWidth-1; x++)
         {
-            for (int y = 0; y < roomHeight; y++)
+            for (int y = 0; y < roomHeight-1; y++)
             {
-                map[x, y] = 1;
+                map[x, y] = new Node(x, y, Node.States.Wall);
             }
         }
     }
 
     //Prints map with all tiles needed
-    private void PrintMap(int[,] map)
+    private void PrintMap(Node[,] map)
     {
         //Loop through map array
-        for (int x = 0; x < roomWidth; x++)
+        for (int x = 0; x < roomWidth-1; x++)
         {
-            for (int y = 0; y < roomHeight; y++)
+            for (int y = 0; y < roomHeight-1; y++)
             {
-                if (map[x, y] == 1)
+                if (map[x, y].currentState == Node.States.Wall)
                 {
                     Instantiate(wallObject, new Vector2(x, y), Quaternion.identity);
                 }
