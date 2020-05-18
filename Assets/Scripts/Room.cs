@@ -1,18 +1,26 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class Room : MonoBehaviour
+﻿using System.Collections.Generic;
+/// <summary>
+/// Represents a room of Nodes.
+/// </summary>
+public class Room
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    //Size variables
+    public int xMin, xMax, yMin, yMax;
+    public int width, height;
 
-    // Update is called once per frame
-    void Update()
+    //List of floor nodes inside the room
+    public List<Node> floorNodesInsideRoom;
+
+    //Constructor
+    public Room(int _startPosX, int _startPosY, int _width, int _height)
     {
-        
+
+        xMin = _startPosX;
+        yMin = _startPosY;
+        width = _width;
+        height = _height;
+        xMax = _startPosX + width;
+        yMax = _startPosY + height;
+        floorNodesInsideRoom = new List<Node>();
     }
 }
