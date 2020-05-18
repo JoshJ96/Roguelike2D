@@ -65,7 +65,8 @@ public class DungeonGenerator : MonoBehaviour
             {
                 if (map[x, y].currentState == Node.States.Wall)
                 {
-                    Instantiate(wallObject, new Vector2(x, y), Quaternion.identity);
+                    GameObject gameObject = Instantiate(wallObject, new Vector2(x, y), Quaternion.identity);
+                    gameObject.transform.parent = this.transform;
                 }
             }
         }
