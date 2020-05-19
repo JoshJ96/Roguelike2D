@@ -9,8 +9,13 @@ public class DungeonGenerator : MonoBehaviour
 {
     //Variables
     public Node[,] map;
+
+    [Range(15, 119)]
     public int roomWidth;
+
+    [Range(15, 119)]
     public int roomHeight;
+
     System.Random random = new System.Random();
     List<Node> openNodes = new List<Node>();
     List<Node> closedNodes = new List<Node>();
@@ -30,7 +35,7 @@ public class DungeonGenerator : MonoBehaviour
     private void Update()
     {
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKey(KeyCode.Space))
         {
             GenerateDungeon();
         }
@@ -74,8 +79,6 @@ public class DungeonGenerator : MonoBehaviour
                 //Create the node mapped to the 2D array
                 Node node = new Node(x, y, Node.States.Wall);
                 map[x, y] = node;
-
-                //Decide which list to put this node on.
 
                 //If we're on a room border, add it to the closed nodes list
                 if (x == 0 || y == 0 || x == roomWidth - 1 || y == roomHeight - 1)
