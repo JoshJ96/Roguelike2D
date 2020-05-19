@@ -13,6 +13,7 @@ public class DungeonGenerator : MonoBehaviour
     public int roomHeight;
     public GameObject wallObject;
     public GameObject floorObject;
+    public GameObject pathObject;
     public List<Node> openMazeNodes = new List<Node>();
     public List<Node> closedMazeNodes = new List<Node>();
     public List<Node> pathMazeNodes = new List<Node>();
@@ -48,6 +49,14 @@ public class DungeonGenerator : MonoBehaviour
 
     private void RecursiveCarve(Node randomNodeChosen)
     {
+        if (openMazeNodes.Count == 0)
+        {
+            cancarve = false;
+            return;
+        }
+        pathMazeNodes.Add(randomNodeChosen);
+        openMazeNodes.Remove(randomNodeChosen);
+
         //Scan surrounding nodes and choose a random direction
         //Get number of possible directions
         List<Node> possibleDirections = new List<Node>();
@@ -71,7 +80,53 @@ public class DungeonGenerator : MonoBehaviour
         //We reach a dead end and the current node cannot go in any of the 4 directions
         if (possibleDirections.Count == 0)
         {
+            //loop through pathnodes
+            foreach (var item in pathMazeNodes)
+            {
+                //if a tile has 4 adjacent floors
+                //Get number of possible directions
+                List<Node> openPositions = new List<Node>();
+                if (openMazeNodes.Contains(map[item.x + 1, item.y]))
+                {
+                    openPositions.Add(map[item.x + 1, item.y]);
+                }
+                if (openMazeNodes.Contains(map[item.x - 1, item.y]))
+                {
+                    openPositions.Add(map[item.x - 1, item.y]);
+                }
+                if (openMazeNodes.Contains(map[item.x, item.y - 1]))
+                {
+                    openPositions.Add(map[item.x, item.y - 1]);
+                }
+                if (openMazeNodes.Contains(map[item.x, item.y + 1]))
+                {
+                    openPositions.Add(map[item.x, item.y + 1]);
+                }
+
+                if (openPositions.Count != 0)
+                {
+                    //Choose random node from the possibleDirections list
+                    int randomIndex = random.Next(openPositions.Count);
+                    deleteThis = openPositions[randomIndex];
+                    return;
+                }
+            }
+
+            //Take random element from open list and start carving
+            if (openMazeNodes.Count != 0)
+            {
+                int randomOpenMazeNodeIndex = random.Next(openMazeNodes.Count);
+
+                deleteThis = openMazeNodes[randomOpenMazeNodeIndex];
+            }
+
             return;
+            
+            //carve it
+            
+
+
+
         }
 
         //Choose random node from the possibleDirections list
@@ -143,6 +198,7 @@ public class DungeonGenerator : MonoBehaviour
         //Clear lists
         openMazeNodes.Clear();
         closedMazeNodes.Clear();
+        pathMazeNodes.Clear();
 
         //Destroy all objects
         foreach (Transform child in transform)
@@ -160,9 +216,8 @@ public class DungeonGenerator : MonoBehaviour
         //Switch lists and turn into wall
         Node randomNodeChosen = openMazeNodes[randomIndex];
         closedMazeNodes.Add(openMazeNodes[randomIndex]);
-        openMazeNodes.RemoveAt(randomIndex);
-
         pathMazeNodes.Add(randomNodeChosen);
+        openMazeNodes.Remove(randomNodeChosen);
         cancarve = true;
         deleteThis = randomNodeChosen;
 
@@ -211,15 +266,27 @@ public class DungeonGenerator : MonoBehaviour
         {
             for (int y = 0; y < roomHeight-1; y++)
             {
-                if (map[x, y].currentState == Node.States.Wall)
+               if (closedMazeNodes.Contains(map[x,y])) 
+                //if (map[x, y].currentState == Node.States.Wall)
                 {
                     GameObject gameObject = Instantiate(wallObject, new Vector2(x, y), Quaternion.identity);
                     gameObject.transform.parent = this.transform;
                 }
-                if (map[x, y].currentState == Node.States.Floor)
+                
+                //if (map[x, y].currentState == Node.States.Floor)
                 {
-                    GameObject gameObject = Instantiate(floorObject, new Vector2(x, y), Quaternion.identity);
-                    gameObject.transform.parent = this.transform;
+                    if (pathMazeNodes.Contains(map[x,y]))
+                    {
+                        GameObject pathObj = Instantiate(pathObject, new Vector2(x, y), Quaternion.identity);
+                        pathObj.transform.parent = this.transform;
+                        continue;
+                    }
+                    if (openMazeNodes.Contains(map[x, y]))
+                    {
+                        GameObject gameObject = Instantiate(floorObject, new Vector2(x, y), Quaternion.identity);
+                        gameObject.transform.parent = this.transform;
+                    }
+                        
                 }
             }
         }
