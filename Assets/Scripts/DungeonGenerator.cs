@@ -11,282 +11,266 @@ public class DungeonGenerator : MonoBehaviour
     public Node[,] map;
     public int roomWidth;
     public int roomHeight;
+    System.Random random = new System.Random();
+    List<Node> openNodes = new List<Node>();
+    List<Node> closedNodes = new List<Node>();
+    List<Node> pivotNodes = new List<Node>();
     public GameObject wallObject;
     public GameObject floorObject;
-    public GameObject pathObject;
-    public List<Node> openMazeNodes = new List<Node>();
-    public List<Node> closedMazeNodes = new List<Node>();
-    public List<Node> pathMazeNodes = new List<Node>();
-    System.Random random = new System.Random();
-    public bool cancarve = false;
-    public Node deleteThis;
+
+    public enum Directions
+    {
+        Up,
+        Down,
+        Left,
+        Right
+    }
 
     //Game loop
     private void Update()
     {
-        //Create dungeon when space is pressed
+
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            //Start timer
-            var startTime = DateTime.Now.Millisecond;
-
-            //Generate dungeon
             GenerateDungeon();
-
-            //End timer
-            var endTime = DateTime.Now.Millisecond;
-            print($"Dungeon generated. Took { endTime - startTime } ms");
         }
-        if (Input.GetKey(KeyCode.E))
-        {
-            if (cancarve)
-            {
-                RecursiveCarve(deleteThis);
-                PrintMap(map);
-            }
-        }
-    }
-
-    private void RecursiveCarve(Node randomNodeChosen)
-    {
-        if (openMazeNodes.Count == 0)
-        {
-            cancarve = false;
-            return;
-        }
-        pathMazeNodes.Add(randomNodeChosen);
-        openMazeNodes.Remove(randomNodeChosen);
-
-        //Scan surrounding nodes and choose a random direction
-        //Get number of possible directions
-        List<Node> possibleDirections = new List<Node>();
-        if (openMazeNodes.Contains(map[randomNodeChosen.x + 1, randomNodeChosen.y]))
-        {
-            possibleDirections.Add(map[randomNodeChosen.x + 1, randomNodeChosen.y]);
-        }
-        if (openMazeNodes.Contains(map[randomNodeChosen.x - 1, randomNodeChosen.y]))
-        {
-            possibleDirections.Add(map[randomNodeChosen.x - 1, randomNodeChosen.y]);
-        }
-        if (openMazeNodes.Contains(map[randomNodeChosen.x, randomNodeChosen.y - 1]))
-        {
-            possibleDirections.Add(map[randomNodeChosen.x, randomNodeChosen.y - 1]);
-        }
-        if (openMazeNodes.Contains(map[randomNodeChosen.x, randomNodeChosen.y + 1]))
-        {
-            possibleDirections.Add(map[randomNodeChosen.x, randomNodeChosen.y + 1]);
-        }
-
-        //We reach a dead end and the current node cannot go in any of the 4 directions
-        if (possibleDirections.Count == 0)
-        {
-            //loop through pathnodes
-            foreach (var item in pathMazeNodes)
-            {
-                //if a tile has 4 adjacent floors
-                //Get number of possible directions
-                List<Node> openPositions = new List<Node>();
-                if (openMazeNodes.Contains(map[item.x + 1, item.y]))
-                {
-                    openPositions.Add(map[item.x + 1, item.y]);
-                }
-                if (openMazeNodes.Contains(map[item.x - 1, item.y]))
-                {
-                    openPositions.Add(map[item.x - 1, item.y]);
-                }
-                if (openMazeNodes.Contains(map[item.x, item.y - 1]))
-                {
-                    openPositions.Add(map[item.x, item.y - 1]);
-                }
-                if (openMazeNodes.Contains(map[item.x, item.y + 1]))
-                {
-                    openPositions.Add(map[item.x, item.y + 1]);
-                }
-
-                if (openPositions.Count != 0)
-                {
-                    //Choose random node from the possibleDirections list
-                    int randomIndex = random.Next(openPositions.Count);
-                    deleteThis = openPositions[randomIndex];
-                    return;
-                }
-            }
-
-            //Take random element from open list and start carving
-            if (openMazeNodes.Count != 0)
-            {
-                int randomOpenMazeNodeIndex = random.Next(openMazeNodes.Count);
-
-                deleteThis = openMazeNodes[randomOpenMazeNodeIndex];
-            }
-
-            return;
-            
-            //carve it
-            
-
-
-
-        }
-
-        //Choose random node from the possibleDirections list
-        int randomDirectionIndex = random.Next(possibleDirections.Count);
-
-        //Officially set the node to carve to
-        Node carveNodeChosen = possibleDirections[randomDirectionIndex];
-
-        //Switch lists
-        pathMazeNodes.Add(carveNodeChosen);
-        openMazeNodes.Remove(carveNodeChosen);
-
-        //Set the adjacent tiles to wall, to make way for the "blocky" maze
-        //If the "to carve" node is to the RIGHT or LEFT of our starting point
-        if (carveNodeChosen.x > randomNodeChosen.x || carveNodeChosen.x < randomNodeChosen.x)
-        {
-            if (!pathMazeNodes.Contains(map[randomNodeChosen.x, randomNodeChosen.y + 1]))
-            {
-                closedMazeNodes.Add(map[randomNodeChosen.x, randomNodeChosen.y + 1]);
-                openMazeNodes.Remove(map[randomNodeChosen.x, randomNodeChosen.y + 1]);
-                map[randomNodeChosen.x, randomNodeChosen.y + 1].currentState = Node.States.Wall;
-            }
-            if (!pathMazeNodes.Contains(map[randomNodeChosen.x, randomNodeChosen.y - 1]))
-            {
-                closedMazeNodes.Add(map[randomNodeChosen.x, randomNodeChosen.y - 1]);
-                openMazeNodes.Remove(map[randomNodeChosen.x, randomNodeChosen.y - 1]);
-                map[randomNodeChosen.x, randomNodeChosen.y - 1].currentState = Node.States.Wall;
-            }
-        }
-        //If the "to carve" node is UP or DOWN of our starting point
-        if (carveNodeChosen.y > randomNodeChosen.y || carveNodeChosen.y < randomNodeChosen.y)
-        {
-            //Switch lists of top and bottom nodes if they're not on path
-            if (!pathMazeNodes.Contains(map[randomNodeChosen.x + 1, randomNodeChosen.y]))
-            {
-                closedMazeNodes.Add(map[randomNodeChosen.x + 1, randomNodeChosen.y]);
-                openMazeNodes.Remove(map[randomNodeChosen.x + 1, randomNodeChosen.y]);
-                map[randomNodeChosen.x + 1, randomNodeChosen.y].currentState = Node.States.Wall;
-            }
-            if (!pathMazeNodes.Contains(map[randomNodeChosen.x - 1, randomNodeChosen.y]))
-            {
-                closedMazeNodes.Add(map[randomNodeChosen.x - 1, randomNodeChosen.y]);
-                openMazeNodes.Remove(map[randomNodeChosen.x - 1, randomNodeChosen.y]);
-                map[randomNodeChosen.x - 1, randomNodeChosen.y].currentState = Node.States.Wall;
-            }
-        }
-        deleteThis = carveNodeChosen;
     }
 
     //Generate Dungeon
     private void GenerateDungeon()
     {
-        //Reset map if necessary
-        ResetMap();
+        //Start timer
+        var startTime = DateTime.Now.Millisecond;
 
         //Fill map with walls
-        FillMap(roomWidth, roomHeight);
+        FillMap();
 
         //Generate maze
         GenerateMaze();
 
         //Print map tiles
-        PrintMap(map);
+        PrintMap();
+
+        //End timer
+        var endTime = DateTime.Now.Millisecond;
+        print($"Dungeon generated. Took { endTime - startTime } ms");
     }
 
-    //ResetMap()
-    private void ResetMap()
+    //Fill map with walls based on width and height
+    private void FillMap()
     {
-        //Clear lists
-        openMazeNodes.Clear();
-        closedMazeNodes.Clear();
-        pathMazeNodes.Clear();
+        //Make sure room values are odd
+        if (roomWidth % 2 == 0)     {roomWidth--;}
+        if (roomHeight % 2 == 0)    {roomHeight--;}
 
-        //Destroy all objects
-        foreach (Transform child in transform)
+        //Initialize map variable
+        map = new Node[roomWidth, roomHeight];
+
+        //Loop through map array
+        for (int x = 0; x < roomWidth; x++)
         {
-            GameObject.Destroy(child.gameObject);
+            for (int y = 0; y < roomHeight; y++)
+            {
+                //Create the node mapped to the 2D array
+                Node node = new Node(x, y, Node.States.Wall);
+                map[x, y] = node;
+
+                //Decide which list to put this node on.
+
+                //If we're on a room border, add it to the closed nodes list
+                if (x == 0 || y == 0 || x == roomWidth - 1 || y == roomHeight - 1)
+                {
+                    closedNodes.Add(node);
+                    continue;
+                }
+
+                //Otherwise, add it to the open list
+                openNodes.Add(node);            
+            }
         }
     }
 
     //Generate Maze within open node list
     private void GenerateMaze()
     {
-        //Choose random node from the open list
-        int randomIndex = random.Next(openMazeNodes.Count);
+        //Choose a random node from open list and set it to a floor
+        Node node = new Node ();
 
-        //Switch lists and turn into wall
-        Node randomNodeChosen = openMazeNodes[randomIndex];
-        closedMazeNodes.Add(openMazeNodes[randomIndex]);
-        pathMazeNodes.Add(randomNodeChosen);
-        openMazeNodes.Remove(randomNodeChosen);
-        cancarve = true;
-        deleteThis = randomNodeChosen;
+        //The node's X and Y coordinate must be an ODD number
+        while (node.x % 2 == 0 || node.y % 2 == 0)
+        {
+            int randomIndex = random.Next(openNodes.Count);
+            node = openNodes[randomIndex];
+        }
+        node.currentState = Node.States.Floor;
 
-        
+        //Change node to closed list
+        pivotNodes.Add(node);
+        openNodes.Remove(node);
+
+        //Start the recursion
+        RecursiveCarve(node);
     }
 
-    //Fill map with walls based on width and height
-    private void FillMap(int _roomWidth, int _roomHeight)
+    private void RecursiveCarve(Node node)
     {
-        //Initialize map variable
-        map = new Node[_roomWidth, _roomHeight];
+        //Get the possible directions from that node
+        List<Directions> directions = GetPossibleDirections(node);
 
-        //Loop through map array
-        for (int x = 0; x < roomWidth-1; x++)
+        //Choose one of these random directions
+        int randomIndex = random.Next(directions.Count);
+
+        //If there's no directions we can go (dead end)
+        if (directions.Count == 0)
         {
-            for (int y = 0; y < roomHeight-1; y++)
+            List<Node> pivotToRemove = new List<Node>();
+            //Loop through the "pivot points"
+            foreach (var item in pivotNodes)
             {
-                //If on the border, make a wall
-                if (x == 0 || y == 0 || x == roomWidth-2 || y == roomHeight-2)
+                //Pivot directions list
+                List<Directions> pivotDirections = GetPossibleDirections(item);
+
+                //If a pivot point has no possible directions, queue it to remove from list
+                if (pivotDirections.Count == 0)
                 {
-                    map[x, y] = new Node(x, y, Node.States.Wall);
-                    closedMazeNodes.Add(map[x, y]);
-;                   continue;
-                }
-                else
-                {
-                    //Otherwise, make a floor
-                    map[x, y] = new Node(x, y, Node.States.Floor);
-                    openMazeNodes.Add(map[x, y]);
+                    pivotToRemove.Add(item);
                 }
             }
+
+            //Delete all pivots that can't be used
+            foreach (var item in pivotToRemove)
+            {
+                pivotNodes.Remove(item);
+            }
+
+            //If there's still usable pivot nodes to use
+            if (pivotNodes.Count != 0)
+            {
+                //Choose a random pivot from the remaining list
+                int randomPivotIndex = random.Next(pivotNodes.Count);
+                Node randomPivotNode = pivotNodes[randomPivotIndex];
+                RecursiveCarve(randomPivotNode);
+            }
+ 
+            //End of the maze generation
+            return;
         }
+
+        //Get list of the 2 nodes we're carving
+        List<Node> nodesToCarve = GetNodesToCarve(directions[randomIndex], node);
+
+        //nodesToCarve[0] is the node we're GOING TO
+        //nodesToCarve[1] is the middle 'even number' node. Todo: reverse these? lol
+
+        //Add the even "middle man" to the closed list
+        Node middleNode = nodesToCarve[1];
+        middleNode.currentState = Node.States.Floor;
+        closedNodes.Add(middleNode);
+        openNodes.Remove(middleNode);
+
+        //Add the odd "pivot point" to the pathnodes list
+        Node nextNode = nodesToCarve[0];
+        nextNode.currentState = Node.States.Floor;
+        pivotNodes.Add(nextNode);
+        openNodes.Remove(nextNode);
+
+        //Start the recursive carve at the newly carved node
+        RecursiveCarve(nextNode);
+    }
+
+    //Returns a list of possible directions the node can travel
+    private List<Directions> GetPossibleDirections(Node node)
+    {
+        //Instantiate the list
+        List<Directions> directions = new List<Directions> {Directions.Up, Directions.Down, Directions.Left, Directions.Right };
+
+        //Check room bounds, and check for a floor node
+
+        //Remove the possibility of moving right
+        if (node.x + 2 >= roomWidth-1 || map[node.x + 2, node.y].currentState == Node.States.Floor)
+        {
+            directions.Remove(Directions.Right);
+        }
+        //Remove the possibility of moving right
+        if (node.x - 2 <= 0 || map[node.x - 2, node.y].currentState == Node.States.Floor)
+        {
+            directions.Remove(Directions.Left);
+        }
+        //Remove the possibility of moving up
+        if (node.y + 2 >= roomHeight-1 || map[node.x, node.y + 2].currentState == Node.States.Floor)
+        {
+            directions.Remove(Directions.Up);
+        }
+        //Remove the possibility of moving down
+        if (node.y - 2 <= 0 || map[node.x, node.y - 2].currentState == Node.States.Floor)
+        {
+            directions.Remove(Directions.Down);
+        }
+
+        //Return the refined list of directions we indeed can move
+        return directions;
+    }
+
+    //Pass in a direction to go with a node, and output the nodes we'll carve
+    private List<Node> GetNodesToCarve(Directions direction, Node node)
+    {
+        //To save confusion, this is a list of exactly TWO nodes to carve
+        List<Node> nodes = new List<Node>();
+
+        //Get these two nodes based on direction given
+        switch (direction)
+        {
+            case Directions.Up:
+                nodes.Add(map[node.x, node.y + 2]);
+                nodes.Add(map[node.x, node.y + 1]);
+                break;
+            case Directions.Down:
+                nodes.Add(map[node.x, node.y - 2]);
+                nodes.Add(map[node.x, node.y - 1]);
+                break;
+            case Directions.Left:
+                nodes.Add(map[node.x - 2, node.y]);
+                nodes.Add(map[node.x - 1, node.y]);
+                break;
+            case Directions.Right:
+                nodes.Add(map[node.x + 2, node.y]);
+                nodes.Add(map[node.x + 1, node.y]);
+                break;
+            default:
+                break;
+        }
+        return nodes;
     }
 
     //Prints map with all tiles needed
-    private void PrintMap(Node[,] map)
+    private void PrintMap()
     {
-        //Destroy all objects
+        //Reset the lists
+        openNodes.Clear();
+        closedNodes.Clear();
+        pivotNodes.Clear();
+
+        //Destroy all objects if necessary
         foreach (Transform child in transform)
         {
             GameObject.Destroy(child.gameObject);
         }
 
         //Loop through map array
-        for (int x = 0; x < roomWidth-1; x++)
+        for (int x = 0; x < roomWidth; x++)
         {
-            for (int y = 0; y < roomHeight-1; y++)
+            for (int y = 0; y < roomHeight; y++)
             {
-               if (closedMazeNodes.Contains(map[x,y])) 
-                //if (map[x, y].currentState == Node.States.Wall)
+                if (map[x, y].currentState == Node.States.Wall)
                 {
                     GameObject gameObject = Instantiate(wallObject, new Vector2(x, y), Quaternion.identity);
                     gameObject.transform.parent = this.transform;
                 }
                 
-                //if (map[x, y].currentState == Node.States.Floor)
+                if (map[x, y].currentState == Node.States.Floor)
                 {
-                    if (pathMazeNodes.Contains(map[x,y]))
-                    {
-                        GameObject pathObj = Instantiate(pathObject, new Vector2(x, y), Quaternion.identity);
-                        pathObj.transform.parent = this.transform;
-                        continue;
-                    }
-                    if (openMazeNodes.Contains(map[x, y]))
-                    {
-                        GameObject gameObject = Instantiate(floorObject, new Vector2(x, y), Quaternion.identity);
-                        gameObject.transform.parent = this.transform;
-                    }
-                        
+                    GameObject gameObject = Instantiate(floorObject, new Vector2(x, y), Quaternion.identity);
+                    gameObject.transform.parent = this.transform;    
                 }
             }
         }

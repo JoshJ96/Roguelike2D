@@ -22,4 +22,12 @@ public class Node
         y = _y;
         currentState = _state;
     }
+
+    //Default constructor
+    public Node()
+    {
+        x = 0;
+        y = 0;
+        currentState = States.Wall;
+    }
 }
