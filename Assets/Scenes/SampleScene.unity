@@ -331,8 +331,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fb6b7da9431e084cb42ac4dd30c7e11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  roomWidth: 120
-  roomHeight: 120
+  mapWidth: 33
+  mapHeight: 34
+  numRooms: 5
+  roomWidthMin: 3
+  roomWidthMax: 7
+  roomHeightMin: 4
+  roomHeightMax: 7
   wallObject: {fileID: 1947651227833026573, guid: f7f40fc3ec7b87a4bbe013edcf5c9e63,
     type: 3}
   floorObject: {fileID: 8484069119128778643, guid: ae0f5d2a6597a394b8361c3c2454d045,

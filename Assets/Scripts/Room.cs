@@ -14,7 +14,6 @@ public class Room
     //Constructor
     public Room(int _startPosX, int _startPosY, int _width, int _height)
     {
-
         xMin = _startPosX;
         yMin = _startPosY;
         width = _width;

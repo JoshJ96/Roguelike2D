@@ -10,16 +10,32 @@ public class DungeonGenerator : MonoBehaviour
     //Variables
     public Node[,] map;
 
-    [Range(15, 119)]
-    public int roomWidth;
+    [UnityEngine.Range(15, 119)]
+    public int mapWidth;
 
-    [Range(15, 119)]
-    public int roomHeight;
+    [UnityEngine.Range(15, 119)]
+    public int mapHeight;
+
+    [UnityEngine.Range(1, 20)]
+    public int numRooms;
+
+    [UnityEngine.Range(2, 20)]
+    public int roomWidthMin;
+
+    [UnityEngine.Range(2, 20)]
+    public int roomWidthMax;
+
+    [UnityEngine.Range(2, 20)]
+    public int roomHeightMin;
+
+    [UnityEngine.Range(2, 20)]
+    public int roomHeightMax;
 
     System.Random random = new System.Random();
     List<Node> openNodes = new List<Node>();
     List<Node> closedNodes = new List<Node>();
     List<Node> pivotNodes = new List<Node>();
+    List<Room> rooms = new List<Room>();
     public GameObject wallObject;
     public GameObject floorObject;
 
@@ -53,6 +69,9 @@ public class DungeonGenerator : MonoBehaviour
         //Generate maze
         GenerateMaze();
 
+        //Generate rooms
+        //GenerateRooms();
+
         //Print map tiles
         PrintMap();
 
@@ -61,27 +80,32 @@ public class DungeonGenerator : MonoBehaviour
         print($"Dungeon generated. Took { endTime - startTime } ms");
     }
 
+    private void GenerateRooms()
+    {
+        throw new NotImplementedException();
+    }
+
     //Fill map with walls based on width and height
     private void FillMap()
     {
         //Make sure room values are odd
-        if (roomWidth % 2 == 0)     {roomWidth--;}
-        if (roomHeight % 2 == 0)    {roomHeight--;}
+        if (mapWidth % 2 == 0)     {mapWidth--;}
+        if (mapHeight % 2 == 0)    {mapHeight--;}
 
         //Initialize map variable
-        map = new Node[roomWidth, roomHeight];
+        map = new Node[mapWidth, mapHeight];
 
         //Loop through map array
-        for (int x = 0; x < roomWidth; x++)
+        for (int x = 0; x < mapWidth; x++)
         {
-            for (int y = 0; y < roomHeight; y++)
+            for (int y = 0; y < mapHeight; y++)
             {
                 //Create the node mapped to the 2D array
                 Node node = new Node(x, y, Node.States.Wall);
                 map[x, y] = node;
 
                 //If we're on a room border, add it to the closed nodes list
-                if (x == 0 || y == 0 || x == roomWidth - 1 || y == roomHeight - 1)
+                if (x == 0 || y == 0 || x == mapWidth - 1 || y == mapHeight - 1)
                 {
                     closedNodes.Add(node);
                     continue;
@@ -190,7 +214,7 @@ public class DungeonGenerator : MonoBehaviour
         //Check room bounds, and check for a floor node
 
         //Remove the possibility of moving right
-        if (node.x + 2 >= roomWidth-1 || map[node.x + 2, node.y].currentState == Node.States.Floor)
+        if (node.x + 2 >= mapWidth-1 || map[node.x + 2, node.y].currentState == Node.States.Floor)
         {
             directions.Remove(Directions.Right);
         }
@@ -200,7 +224,7 @@ public class DungeonGenerator : MonoBehaviour
             directions.Remove(Directions.Left);
         }
         //Remove the possibility of moving up
-        if (node.y + 2 >= roomHeight-1 || map[node.x, node.y + 2].currentState == Node.States.Floor)
+        if (node.y + 2 >= mapHeight-1 || map[node.x, node.y + 2].currentState == Node.States.Floor)
         {
             directions.Remove(Directions.Up);
         }
@@ -260,9 +284,9 @@ public class DungeonGenerator : MonoBehaviour
         }
 
         //Loop through map array
-        for (int x = 0; x < roomWidth; x++)
+        for (int x = 0; x < mapWidth; x++)
         {
-            for (int y = 0; y < roomHeight; y++)
+            for (int y = 0; y < mapHeight; y++)
             {
                 if (map[x, y].currentState == Node.States.Wall)
                 {
